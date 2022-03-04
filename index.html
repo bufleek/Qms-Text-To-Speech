@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body
+    style="
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    "
+  >
+    <style>
+      * {
+        padding: 10px;
+        margin: 4px;
+      }
+    </style>
+    <h1>Qms Speech Test</h1>
+    <div style="display: flex">
+      <input type="text" name="text" id="text" value="" />
+      <button id="test">Test</button>
+    </div>
+  </body>
+</html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+  document.getElementById("test").addEventListener("click", function (el) {
+    let text = document.getElementById("text").value;
+    $.ajax({
+      type: "post",
+      url: "/speech",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify({ text: text }),
+      xhr: function () {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState == 2) {
+            if (xhr.status == 200) {
+              xhr.responseType = "blob";
+            } else {
+              xhr.responseType = "text";
+            }
+          }
+        };
+        return xhr;
+      },
+      success: function (data) {
+        var blob = new Blob([data], { type: "application/octetstream" });
+        var url = URL.createObjectURL(blob);
+        let audio = new Audio(url);
+        audio.play();
+      },
+    });
+  });
+</script>
