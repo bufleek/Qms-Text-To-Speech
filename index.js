@@ -3,6 +3,7 @@ const gtts = require("node-gtts")("en-uk");
 const path = require("path");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const { randomUUID } = require("crypto");
 
 const app = express();
 app.use(cors());
@@ -24,15 +25,22 @@ app.get("/test", (req, res) => {
   res.sendFile(path.join(__dirname, "/test.mp3"));
 });
 
+app.get("/files/audios/:file", (req, res) => {
+  var file = req.params.file;
+  res.sendFile(path.join(__dirname, "files/audios", file));
+});
+
 app.post("/error", (req, res) => {
   console.log(req.body.error);
   res.send({});
 });
 
 app.post("/speech", cors(corsOptions), function (req, res) {
-  console.log(req.body);
-  res.set({ "Content-Type": "audio/mpeg" });
-  gtts.stream("Ticket number. OUT1 . go to . Consultation 1 ").pipe(res);
+  let file = path.join("/files/audios", `${randomUUID()}_${Date.now()}.mp3`);
+  let filepath = path.join(__dirname, file);
+  let time = new Date();
+  gtts.save(filepath, `file saved at ${time.getHours()}:${time.getMinutes()}`);
+  res.send({ url: file });
 });
 
 app.listen(3000, () => {
