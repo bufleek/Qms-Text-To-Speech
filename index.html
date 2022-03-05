@@ -25,12 +25,40 @@
       <input type="text" name="text" id="text" value="" />
       <button id="test">Test</button>
     </div>
+    <div id="waveform"></div>
   </body>
 </html>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/wavesurfer.js/1.0.52/wavesurfer.min.js"></script>
 <script>
-  document.getElementById("test").addEventListener("click", function (el) {
-    let text = document.getElementById("text").value;
+  var Sound = (function () {
+    var df = document.createDocumentFragment();
+    return function Sound(src) {
+      var snd = new Audio(src);
+      df.appendChild(snd); // keep in fragment until finished playing
+      snd.addEventListener("ended", function () {
+        df.removeChild(snd);
+      });
+      snd.play();
+      return snd;
+    };
+  })();
+
+  function postError(error) {
+    $.ajax({
+      type: "POST",
+      url: "/error",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: JSON.stringify({ error: error }),
+    });
+  }
+
+  function speech() {
+    var host = location.href;
+    console.log(host);
+    var text = document.getElementById("text").value;
     $.ajax({
       type: "post",
       url: "/speech",
@@ -52,11 +80,63 @@
         return xhr;
       },
       success: function (data) {
-        var blob = new Blob([data], { type: "application/octetstream" });
-        var url = URL.createObjectURL(blob);
-        let audio = new Audio(url);
-        audio.play();
+        try {
+          console.log(data);
+          // var blob = new Blob([data], { type: "audio/wav" });
+          var url = URL.createObjectURL(data);
+          var wavesurfer = WaveSurfer.create({
+            container: "#waveform",
+            waveColor: "violet",
+            progressColor: "purple",
+          });
+          wavesurfer.load(url);
+          wavesurfer.playPause();
+          console.log(url);
+          // play(url);
+
+          // url = url.replace(host, "");
+          // play(url);
+          // window.alert("blob url is " + url);
+
+          // var reader = new FileReader();
+          // reader.onload = function (e) {
+          //   var srcUrl = e.target.result;
+          //   postError({ base: srcUrl, url: url });
+          //   var snd = Sound(url);
+          //   // play(srcUrl);
+          // };
+          // reader.readAsDataURL(data);
+
+          // postError(url);
+        } catch (err) {
+          postError(err);
+        }
       },
     });
-  });
+  }
+
+  function play(url) {
+    if (url == null) {
+      var audio = new Audio("/test");
+      audio.play();
+    } else {
+      var audio = new Audio(url);
+      audio.play();
+    }
+  }
+
+  try {
+    speech();
+  } catch (err) {
+    postError(err);
+  }
+
+  // document.getElementById("test").addEventListener("click", function (el) {
+  //   speech();
+  // });
+
+  // document.getElementById("text").addEventListener("keyup", function (el) {
+  //   var audio = new Audio("/test");
+  //   audio.play();
+  // });
 </script>
