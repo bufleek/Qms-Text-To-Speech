@@ -38,8 +38,7 @@ app.post("/error", (req, res) => {
 app.post("/speech", cors(corsOptions), function (req, res) {
   let file = path.join("/files/audios", `${randomUUID()}_${Date.now()}.mp3`);
   let filepath = path.join(__dirname, file);
-  let time = new Date();
-  gtts.save(filepath, `file saved at ${time.getHours()}:${time.getMinutes()}`);
+  gtts.save(filepath, req.body.text);
   res.send({ url: file });
 });
 
