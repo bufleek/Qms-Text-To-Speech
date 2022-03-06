@@ -3,7 +3,7 @@ const gtts = require("node-gtts")("en-uk");
 const path = require("path");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const { randomUUID } = require("crypto");
+const crypto = require("crypto");
 
 const app = express();
 app.use(cors());
@@ -27,8 +27,11 @@ app.get("/test", (req, res) => {
 
 app.get("/files/audios/:file", (req, res) => {
   var file = req.params.file;
-   res.header("Access-Control-Allow-Origin", "*");
-   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
   res.sendFile(path.join(__dirname, "files/audios", file));
 });
 
@@ -38,9 +41,13 @@ app.post("/error", (req, res) => {
 });
 
 app.post("/speech", function (req, res) {
-  let file = path.join("files", "audios", `${randomUUID()}_${Date.now()}.mp3`);
+  let file = path.join(
+    "files",
+    "audios",
+    `${crypto.randomUUID()}_${Date.now()}.mp3`
+  );
   let filepath = path.join(__dirname, file);
-  console.log(req.body)
+  console.log(req.body);
   gtts.save(filepath, req.body.text);
   res.send({ url: file });
 });
