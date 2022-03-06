@@ -27,6 +27,8 @@ app.get("/test", (req, res) => {
 
 app.get("/files/audios/:file", (req, res) => {
   var file = req.params.file;
+   res.header("Access-Control-Allow-Origin", "*");
+   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   res.sendFile(path.join(__dirname, "files/audios", file));
 });
 
@@ -35,9 +37,10 @@ app.post("/error", (req, res) => {
   res.send({});
 });
 
-app.post("/speech", cors(corsOptions), function (req, res) {
-  let file = path.join("/files/audios", `${randomUUID()}_${Date.now()}.mp3`);
+app.post("/speech", function (req, res) {
+  let file = path.join("files", "audios", `${randomUUID()}_${Date.now()}.mp3`);
   let filepath = path.join(__dirname, file);
+  console.log(req.body)
   gtts.save(filepath, req.body.text);
   res.send({ url: file });
 });
