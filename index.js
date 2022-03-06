@@ -3,7 +3,7 @@ const gtts = require("node-gtts")("en-uk");
 const path = require("path");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const crypto = require("crypto");
+const nanoId = require("nanoid");
 
 const app = express();
 app.use(cors());
@@ -44,7 +44,7 @@ app.post("/speech", function (req, res) {
   let file = path.join(
     "files",
     "audios",
-    `${crypto.randomUUID()}_${Date.now()}.mp3`
+    `${nanoId.nanoid()}_${Date.now()}.mp3`
   );
   let filepath = path.join(__dirname, file);
   console.log(req.body);
